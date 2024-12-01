@@ -59,13 +59,13 @@ export default function Passwords({onLogin}){
                 <br/>
                 <button onClick={() => {
                     
-                    fetch('http://127.0.0.1:5000/checkUser', {
+                    fetch('http://localhost:3000/api/auth/login', {
                         headers : {
                             'Content-Type' : 'application/json',
-                            'Access-Control-Allow-Origin' : '*'
+                            'Access-Control-Allow-Origin': `http://localhost:3000`
                         },
                         method : 'POST',
-                        mode: 'cors',
+                        credentials: 'include',
                         body : JSON.stringify( {
                             'username': document.getElementById('user101').value,
                             'password': document.getElementById('pass101').value,
@@ -77,39 +77,28 @@ export default function Passwords({onLogin}){
                             response.json()
                             .then(function(response) {
                                 console.log(response);
-                                if(response.length !== 0){
-                                    onLogin([1, response[0][0]])
+                                if(response['success']){
+                                    onLogin(1)
                                 }
-                                else
-                                    onLogin([-1,-1])
+                                    
                             })
 
                         }
                         else {
-                            throw Error('Something went wrong');
+                            onLogin(-1)
+                            
                         }
                     })
                     .catch(function(error) {
                         console.log(error);
                     });
 
-                    // let str = document.getElementById("user101").value;
-                    // if(myMap.has(str)){
-                    //     if (myMap.get(str) === document.getElementById("pass101").value){
-                    //         onLogin(1);
-                    //         return;
-                    //     }
-                    //     onLogin(-1);
-                    //     return;
-                    // } 
-                    // onLogin(-1);
-                    // return;
                 }}>SUBMIT</button>
 
                 <br/>
                 <br/>
                 <br/>
-                <button style = {buttonStyle} onClick = {()=> setButtonPopup(true)}>
+                {/* <button style = {buttonStyle} onClick = {()=> setButtonPopup(true)}>
                     Create a Log-In
                 </button>
                 
@@ -144,7 +133,7 @@ export default function Passwords({onLogin}){
                          
                     </div>
                     
-                </Dialog>
+                </Dialog> */}
             </div>
         
         </>
@@ -152,7 +141,7 @@ export default function Passwords({onLogin}){
 }
 
 async function getData() {
-    fetch('http://127.0.0.1:5000/interactUser', {
+    fetch('http://127.0.0.1:3000/interactUser', {
         headers : {
             'Content-Type' : 'application/json',
             'Access-Control-Allow-Origin' : '*'

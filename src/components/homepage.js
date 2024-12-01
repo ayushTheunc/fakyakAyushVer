@@ -7,13 +7,12 @@ import Dialog from "@mui/material/Dialog";
 
 
 
-export default function HomePage({onChange, newState}){
+export default function HomePage({onChange}){
 
-    const [nodes, setNodes] = useState(undefined);
     
     const[postData, setPostData] = useState(undefined);
 
-    const[openDialog, setOpenDialog] = useState([false,null]);
+ //   const[openDialog, setOpenDialog] = useState([false,null]);
 
 
      const divStyle = {
@@ -34,34 +33,16 @@ export default function HomePage({onChange, newState}){
         borderRadius: "10px",
         border: "1px solid black",
      };
+
     
-    if(nodes === undefined){
-        
-        fetch(`http://127.0.0.1:5000/getUser/${newState[1]}`, {
-            headers : {
-                'Content-Type' : 'application/json',
-                'Access-Control-Allow-Origin' : '*'
-            },
-            method : 'GET',
-            mode: 'cors',
-        })
-        .then(res => res.json()).then((data) => {
-            setNodes(data)
-        }
-        )
-        .catch(function(error) {
-            console.log(error);
-        });
-        
-    }
     if(postData === undefined){
-        fetch('http://127.0.0.1:5000/interactPost', {
+        fetch('http://127.0.0.1:3000/api/posts/shared-with-me', {
             headers : {
                 'Content-Type' : 'application/json',
-                'Access-Control-Allow-Origin' : '*'
+                'Access-Control-Allow-Credentials' : "true"
             },
             method : 'GET',
-            mode: 'cors',
+            credentials: 'true'
         })
         .then(function (response){
     
@@ -82,7 +63,7 @@ export default function HomePage({onChange, newState}){
     
    
 
-    if(nodes === undefined || postData === undefined){
+    if(postData === undefined){
         return (<div></div>)
     }
     return (
@@ -92,9 +73,36 @@ export default function HomePage({onChange, newState}){
 
                 <div style={{display: "grid", gridTemplateColumns: "1fr 2fr 1fr"}}>
                     <div></div>
-                    <div><h1>Welcome {nodes[0][1]}</h1></div>
+                    <div><h1>Welcome to Fakyak!</h1></div>
                     <div>
-                    <button onClick={onChange}>LOG OUT</button>
+                    <button onClick={ () => {
+                        fetch('http://127.0.0.1:3000/logout', {
+                            headers : {
+                                'Content-Type' : 'application/json',
+                                'Access-Control-Allow-Origin' : '*'
+                            },
+                            method : 'POST',
+                            mode: 'cors',
+                        })
+                        .then(function (response){
+                    
+                            if(response.ok) {
+                                response.json()
+                                .then(function(response) {
+                                    console.log(response);
+                                });
+                            }
+                            else {
+                                throw Error('Something went wrong');
+                            }
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });
+                        
+                        onChange()
+                        
+                        }}>LOG OUT</button>
                     </div>
 
                 </div>
@@ -110,7 +118,7 @@ export default function HomePage({onChange, newState}){
                     
                     
                     <button onClick={() => {      
-                        fetch('http://127.0.0.1:5000/interactPost', {
+                        fetch('http://127.0.0.1:3000/', {
                             headers : {
                                 'Content-Type' : 'application/json',
                                 'Access-Control-Allow-Origin' : '*'
@@ -118,9 +126,7 @@ export default function HomePage({onChange, newState}){
                             method : 'POST',
                             mode: 'cors',
                             body : JSON.stringify( {
-                                'userid': nodes[0][0],
                                 'content' : document.getElementById('postArea').value,
-                                'createdAt': new Date().toLocaleString()
                             })
                         })
                         .then(function (response){
@@ -150,53 +156,52 @@ export default function HomePage({onChange, newState}){
 
                         return(
                         <div style={{display: "grid", gridTemplateColumns: "1fr 2fr 1fr 1fr"}} key={data[0]}>
-                            <label>{data[5]}: </label>
-                            <label>{data[2]}</label>
-                            <label>{data[8]}</label>
-                            {data[1] === nodes[0][0] ? 
-                            (<div>
-                                <button style={{display: 'inline'}} onClick={() =>{
+                            <label>{data['SharedBy']}: </label>
+                            <label>{data['Content']}</label>
+                            <label>{data['CreatedAt']}</label>
+                            {/* {data[1] === nodes[0][0] ? (
+                                <div>
+                                    <button style={{display: 'inline'}} onClick={() =>{
 
-                                    setOpenDialog([true, data])
+                                        setOpenDialog([true, data])
 
-                                }}>Update</button>
-                                <button style={{display: 'inline', marginLeft: 5}} onClick={() =>{
-                                    fetch('http://127.0.0.1:5000/deletePost', {
-                                        headers : {
-                                            'Content-Type' : 'application/json',
-                                            'Access-Control-Allow-Origin' : '*'
-                                        },
-                                        method : 'POST',
-                                        mode: 'cors',
-                                        body : JSON.stringify( {
-                                            'postid': data[0],
-                                            
+                                    }}>Update</button>
+                                    <button style={{display: 'inline', marginLeft: 5}} onClick={() =>{
+                                        fetch('http://127.0.0.1:3000/deletePost', {
+                                            headers : {
+                                                'Content-Type' : 'application/json',
+                                                'Access-Control-Allow-Origin' : '*'
+                                            },
+                                            method : 'POST',
+                                            mode: 'cors',
+                                            body : JSON.stringify( {
+                                                'postid': data[0],
+                                                
+                                            })
                                         })
-                                    })
-                                    .then(function (response){
-                                
-                                        if(response.ok) {
-                                            response.json()
-                                            .then(function(response) {
-                                                console.log(response);
-                                            });
-                                        }
-                                        else {
-                                            throw Error('Something went wrong');
-                                        }
-                                    })
-                                    .catch(function(error) {
-                                        console.log(error);
-                                    });
-
-                                    setPostData(undefined)
+                                        .then(function (response){
                                     
+                                            if(response.ok) {
+                                                response.json()
+                                                .then(function(response) {
+                                                    console.log(response);
+                                                });
+                                            }
+                                            else {
+                                                throw Error('Something went wrong');
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            console.log(error);
+                                        });
+
+                                        setPostData(undefined)
+                                        
 
 
 
-                                }}>Delete</button>
-                            </div>) : (<div></div>)
-                            }
+                                    }}>Delete</button>
+                            </div>) : (<div></div>)} */}
                             
                             <br/>
                             <br/>
@@ -205,7 +210,7 @@ export default function HomePage({onChange, newState}){
                         
                     })
                 }
-                <Dialog onClose = {() => setOpenDialog([false,null])} open = {openDialog[0]}>
+                {/* <Dialog onClose = {() => setOpenDialog([false,null])} open = {openDialog[0]}>
                     <DialogTitle>Please fill out the information</DialogTitle>
                     <div style={{padding: 100}}>
                     <div>
@@ -218,7 +223,8 @@ export default function HomePage({onChange, newState}){
                         
                         
                         <button onClick={() => {      
-                            fetch('http://127.0.0.1:5000/interactPost', {
+                            //modify later to include share posts
+                            fetch('http://127.0.0.1:3000/shared-with-me', {
                                 headers : {
                                     'Content-Type' : 'application/json',
                                     'Access-Control-Allow-Origin' : '*'
@@ -254,7 +260,7 @@ export default function HomePage({onChange, newState}){
                          
                     </div>
                     
-                </Dialog>
+                </Dialog> */}
             </div>
         </>
         

@@ -13,14 +13,14 @@ import { useState} from 'react';
 
 function App() {
 
-  let [login, updateLogin] = useState([0, -1]);
+  let [login, updateLogin] = useState(0);
   
 
   console.log("Are you loggged in?: " + login)
   return (
     <div>
-      {login[0] <= 0 ? 
-      (login[0] === -1 ? (
+      {login <= 0 ? 
+      (login < 0 ? (
           <div className='App'>
             <Passwords onLogin={(param) => {
               updateLogin(param);
@@ -36,7 +36,7 @@ function App() {
         </div>
         )) 
       :
-      (<HomePage onChange={() => updateLogin([0,-1])} newState={login}></HomePage>)}  
+      (<HomePage onChange={() => updateLogin(0)}></HomePage>)}  
     </div>
   );
 }
